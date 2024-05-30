@@ -37,18 +37,16 @@ class OrderController extends Controller
 
         $order = new Order;
 
-        $order->controller_amount = $validated['controller_amount']; 
+        $order->controller_amount = $validated['controller_amount'];
 
-        $order->user_id = $request->user()->id;
-        $order->status = 'ORDERED'; 
+        $order->user_id = 1;
+        $order->status = 'ORDERED';
         $order->console_available_id = $request->console_available_id;
         $order->schedule_id = $request->schedule_id;
 
         $order->save();
 
         OrderCreated::dispatch($order);
-
-        session()->flash('success');
 
         return redirect('/dashboard');
     }
@@ -88,23 +86,26 @@ class OrderController extends Controller
     /**
      * Index joined
      */
-    public function indexJoined(Request $request) {
+    public function indexJoined(Request $request)
+    {
         $orderHistory = DB::table('orders')
-        ->join('console_availables', 'orders.console_available_id','console_availables.id')
-        ->join('consoles', 'console_availables.console_id', 'consoles.id')
-        ->join('schedules', 'orders.schedule_id', 'schedules.id')
-        ->where('orders.user_id','=', $request->user()->id)
-        ->orderBy('schedules.date', 'asc')
-        ->select('orders.id', 
-        'orders.status',
-        'orders.controller_amount', 
-        'orders.console_available_id',
-        'consoles.name', 
-        'schedules.date', 
-        'schedules.start',
-        'schedules.end')
-        ->get();
+            ->join('console_availables', 'orders.console_available_id', 'console_availables.id')
+            ->join('consoles', 'console_availables.console_id', 'consoles.id')
+            ->join('schedules', 'orders.schedule_id', 'schedules.id')
+            ->where('orders.user_id', '=', 1)
+            ->orderBy('schedules.date', 'asc')
+            ->select(
+                'orders.id',
+                'orders.status',
+                'orders.controller_amount',
+                'orders.console_available_id',
+                'consoles.name',
+                'schedules.date',
+                'schedules.start',
+                'schedules.end'
+            )
+            ->get();
 
-        return view('dashboard',['orderHistory' => $orderHistory]);
+        return response()->json($orderHistory);
     }
 }

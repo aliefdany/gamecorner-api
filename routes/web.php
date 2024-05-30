@@ -9,7 +9,7 @@ Route::get('/schedule/{id}', [ScheduleController::class, 'show'])->name('schedul
 // Route::middleware(['auth', 'verified'])->group(function () {
 // });
 
-Route::post('/order', [OrderController::class, 'store'])->middleware(['auth'])->name('order.store');
+Route::post('/order', [OrderController::class, 'store'])->name('order.store');
 
 Route::get('/dashboard', [OrderController::class, 'indexJoined'])->name('dashboard');
 
