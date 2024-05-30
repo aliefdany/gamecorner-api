@@ -44,12 +44,12 @@ class ScheduleController extends Controller
     {
         // echo $schedule;
         $sched = DB::table('schedules')
-        ->join('console_availables', 'schedules.console_available_id','console_availables.id')
-        ->join('consoles', 'console_availables.console_id', 'consoles.id')
-        ->orderBy('consoles.name', 'asc')
-        ->where('schedules.id', $id)
-        ->select('schedules.*', 'console_availables.code' ,'consoles.name')
-        ->get();
+            ->join('console_availables', 'schedules.console_available_id', 'console_availables.id')
+            ->join('consoles', 'console_availables.console_id', 'consoles.id')
+            ->orderBy('consoles.name', 'asc')
+            ->where('schedules.id', $id)
+            ->select('schedules.*', 'console_availables.code', 'consoles.name')
+            ->get();
 
         return view('schedule.detail', ['schedule' => $sched->first()]);
     }
@@ -81,39 +81,40 @@ class ScheduleController extends Controller
     /**
      * View joined schedules data
      */
-    public function indexJoined(Request $request) {
+    public function indexJoined(Request $request)
+    {
         $date = '';
-        if(!$request->query('date')) {
+        if (!$request->query('date')) {
             $date = now();
         } else {
             $date = Carbon::createFromFormat('d/m/Y', $request->query('date'));
         }
 
         $schedulesByConsole = DB::table('schedules')
-        ->join('console_availables', 'schedules.console_available_id','console_availables.id')
-        ->join('consoles', 'console_availables.console_id', 'consoles.id')
-        ->orderBy('consoles.name', 'asc')
-        ->select('schedules.*', 'console_availables.code' ,'consoles.name')
-        ->whereDate('date',$date->format('Y-m-d'))
-        ->get();
+            ->join('console_availables', 'schedules.console_available_id', 'console_availables.id')
+            ->join('consoles', 'console_availables.console_id', 'consoles.id')
+            ->orderBy('consoles.name', 'asc')
+            ->select('schedules.*', 'console_availables.code', 'consoles.name')
+            ->whereDate('date', $date->format('Y-m-d'))
+            ->get();
 
 
         $bookingListsArray = json_decode(json_encode($schedulesByConsole), true);
 
         $grouped = array();
-        foreach($bookingListsArray as $b) {
+        foreach ($bookingListsArray as $b) {
 
             $key = $b['console_available_id'];
 
             if (array_key_exists($key, $grouped)) {
                 array_push($grouped[$key]['schedules'], $b);
             } else {
-                $grouped[$key] = array('name'=> $b['name'], 'console_available_id'=> $key,'schedules' => array($b));
+                $grouped[$key] = array('name' => $b['name'], 'console_available_id' => $key, 'schedules' => array($b));
             }
         }
 
         $schedulesByConsole = json_decode(json_encode($grouped));
 
-        return view('schedule.list', ['schedulesByConsole' => $schedulesByConsole]);
+        return response()->json($schedulesByConsole);
     }
 }
